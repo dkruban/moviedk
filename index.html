@@ -3,474 +3,195 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>MOVIEDK | Auto Sync</title>
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&family=Rajdhani:wght@300;500;700&display=swap" rel="stylesheet">
+    <title>Movie and Series Links</title>
     <style>
-        :root {
-            --neon-blue: #00f3ff;
-            --neon-purple: #bc13fe;
-            --neon-green: #0aff0a;
-            --bg-dark: #050510;
-            --glass-bg: rgba(255, 255, 255, 0.05);
-            --glass-border: rgba(255, 255, 255, 0.1);
-            --font-head: 'Orbitron', sans-serif;
-            --font-body: 'Rajdhani', sans-serif;
-        }
-
-        * { box-sizing: border-box; margin: 0; padding: 0; }
+        /* Basic CSS for the page layout */
         body {
-            background-color: var(--bg-dark);
-            color: #fff;
-            font-family: var(--font-body);
-            overflow-x: hidden;
-            min-height: 100vh;
+            font-family: Arial, sans-serif;
+            background-color: #f4f4f9;
+            margin: 0;
+            padding: 20px;
+            display: flex;
+            justify-content: center;
         }
 
-        /* Background Canvas */
-        #bg-canvas {
-            position: fixed;
-            top: 0; left: 0;
-            width: 100%; height: 100%;
-            z-index: -1;
-        }
-
-        /* Header */
-        header {
-            padding: 2rem;
-            text-align: center;
-            z-index: 10;
-            position: relative;
-            animation: fadeInDown 1s ease-out;
-        }
-
-        h1 {
-            font-family: var(--font-head);
-            font-size: 3.5rem;
-            text-transform: uppercase;
-            letter-spacing: 5px;
-            background: linear-gradient(90deg, var(--neon-blue), #fff, var(--neon-purple));
-            -webkit-background-clip: text;
-            color: transparent;
-            text-shadow: 0 0 20px rgba(0, 243, 255, 0.5);
-        }
-
-        /* Search Bar Section */
-        .search-section {
-            max-width: 600px;
-            margin: 0 auto 2rem auto;
-            position: relative;
-            z-index: 10;
-        }
-
-        .search-input {
-            width: 100%;
-            padding: 1rem;
-            background: rgba(0,0,0,0.6);
-            border: 2px solid var(--neon-purple);
-            color: #fff;
-            font-family: var(--font-head);
-            font-size: 1.2rem;
-            border-radius: 50px;
-            text-align: center;
-            outline: none;
-            transition: 0.3s;
-        }
-
-        .search-input:focus {
-            box-shadow: 0 0 20px var(--neon-purple);
-            border-color: var(--neon-blue);
-        }
-
-        main {
+        .container {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 20px; /* Space between cards */
             max-width: 1200px;
-            margin: 0 auto;
-            padding: 2rem;
-            position: relative;
-            z-index: 10;
         }
 
-        .cinema-matrix {
-            display: grid;
-            grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
-            gap: 2rem;
-        }
-
-        /* Movie Card Styles */
         .movie-card {
-            background: var(--glass-bg);
-            border-radius: 15px;
+            background-color: white;
+            border-radius: 8px;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.2);
+            width: 280px; /* Card width */
             overflow: hidden;
-            border: 1px solid var(--glass-border);
-            transition: 0.3s;
-            position: relative;
-            cursor: pointer;
-            height: 380px;
             display: flex;
             flex-direction: column;
+            transition: transform 0.2s;
         }
 
         .movie-card:hover {
-            transform: scale(1.05) translateY(-10px);
-            border-color: var(--neon-blue);
-            box-shadow: 0 0 30px rgba(0, 243, 255, 0.2);
-            z-index: 5;
+            transform: translateY(-5px); /* Lift effect on hover */
         }
 
-        .card-img-container {
-            height: 250px;
-            overflow: hidden;
-            position: relative;
-        }
-
-        .card-img {
+        .movie-card img {
             width: 100%;
-            height: 100%;
-            object-fit: cover;
-            transition: 0.5s;
+            height: auto;
+            display: block;
         }
 
-        .movie-card:hover .card-img {
-            transform: scale(1.1);
-        }
-
-        .card-info {
-            padding: 1.5rem;
-            flex-grow: 1;
+        .movie-info {
+            padding: 15px;
             display: flex;
             flex-direction: column;
-            justify-content: center;
-            background: linear-gradient(to top, rgba(0,0,0,0.9), transparent);
-            text-align: center;
+            justify-content: space-between;
+            flex-grow: 1;
         }
 
-        .card-title {
-            font-family: var(--font-head);
-            font-size: 1.2rem;
-            color: #fff;
+        .movie-info h3 {
+            margin-top: 0;
+            font-size: 16px;
+            color: #333;
+            line-height: 1.4;
         }
 
-        .card-sub {
-            font-size: 0.8rem;
-            color: var(--neon-green);
-            margin-top: 5px;
-        }
-
-        /* Modal */
-        .modal-overlay {
-            position: fixed;
-            top: 0; left: 0;
-            width: 100%; height: 100%;
-            background: rgba(0, 0, 0, 0.9);
-            backdrop-filter: blur(10px);
-            z-index: 100;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            opacity: 0;
-            visibility: hidden;
-            transition: 0.3s;
-        }
-
-        .modal-overlay.active { opacity: 1; visibility: visible; }
-
-        .modal-box {
-            background: #0a0a1a;
-            border: 2px solid var(--neon-blue);
-            box-shadow: 0 0 50px rgba(0, 243, 255, 0.3);
-            padding: 3rem;
-            border-radius: 20px;
-            text-align: center;
-            max-width: 500px;
-            width: 90%;
-            transform: scale(0.8);
-            transition: 0.3s;
-        }
-
-        .modal-overlay.active .modal-box { transform: scale(1); }
-
-        .modal-title {
-            font-family: var(--font-head);
-            font-size: 2rem;
-            margin-bottom: 1rem;
-            color: var(--neon-blue);
-        }
-
-        .modal-actions {
-            margin-top: 2rem;
-            display: flex;
-            gap: 1rem;
-            justify-content: center;
-        }
-
-        .btn-confirm {
-            background: var(--neon-green);
-            color: #000;
-            border: none;
-            padding: 1rem 2rem;
-            font-family: var(--font-head);
-            font-weight: bold;
-            border-radius: 5px;
-            cursor: pointer;
-            text-transform: uppercase;
-        }
-
-        .btn-cancel {
-            background: transparent;
-            border: 1px solid var(--neon-purple);
-            color: var(--neon-purple);
-            padding: 1rem 2rem;
-            font-family: var(--font-head);
-            border-radius: 5px;
-            cursor: pointer;
-            text-transform: uppercase;
-        }
-
-        .progress-container {
-            margin-top: 2rem;
-            display: none;
-        }
-        
-        .progress-bar-bg {
+        .download-btn {
+            display: block;
             width: 100%;
-            height: 10px;
-            background: #333;
-            border-radius: 5px;
-            overflow: hidden;
-        }
-        
-        .progress-bar-fill {
-            height: 100%;
-            width: 0%;
-            background: var(--neon-blue);
-            box-shadow: 0 0 10px var(--neon-blue);
-            transition: width 0.2s;
+            padding: 10px 0;
+            margin-top: 15px;
+            background-color: #007bff;
+            color: white;
+            text-align: center;
+            text-decoration: none;
+            border-radius: 4px;
+            font-weight: bold;
+            border: none;
+            cursor: pointer;
         }
 
-        @keyframes fadeInDown {
-            from { opacity: 0; transform: translateY(-50px); }
-            to { opacity: 1; transform: translateY(0); }
+        .download-btn:hover {
+            background-color: #0056b3;
         }
     </style>
 </head>
 <body>
 
-    <canvas id="bg-canvas"></canvas>
-
-    <header>
-        <h1>MOVIEDK</h1>
-        <p style="color: var(--neon-blue); letter-spacing: 2px;">LINK MATRIX</p>
-    </header>
-
-    <div class="search-section">
-        <input type="text" id="searchInput" class="search-input" placeholder="Search Movie Name..." onkeyup="filterMovies()">
-    </div>
-
-    <main>
-        <div class="cinema-matrix" id="movieGrid">
-            <!-- Movies load here -->
-        </div>
-    </main>
-
-    <!-- Modal -->
-    <div class="modal-overlay" id="downloadModal">
-        <div class="modal-box">
-            <h3 class="modal-title">Initiate Download?</h3>
-            <p id="modalMovieName" style="color: #ccc; margin-bottom: 20px;">Movie Name</p>
-            
-            <div class="modal-actions" id="modalButtons">
-                <button class="btn-confirm" onclick="confirmDownload()">YES</button>
-                <button class="btn-cancel" onclick="closeModal()">NO</button>
-            </div>
-
-            <div class="progress-container" id="progressContainer">
-                <p style="margin-bottom: 5px; color: var(--neon-blue);">DOWNLOADING...</p>
-                <div class="progress-bar-bg">
-                    <div class="progress-bar-fill" id="progressBar"></div>
-                </div>
-            </div>
-        </div>
+    <div class="container" id="movie-container">
+        <!-- The movie cards will be inserted here by JavaScript -->
     </div>
 
     <script>
-        // --- 1. CONFIGURATION ---
-        // Ensure movies.json is in the same folder as this HTML file
-        const DATA_URL = './movies.json'; 
-        
-        let allMovies = [];
-        const grid = document.getElementById('movieGrid');
-        const modal = document.getElementById('downloadModal');
-        const modalTitle = document.getElementById('modalMovieName');
-        const modalButtons = document.getElementById('modalButtons');
-        const progressContainer = document.getElementById('progressContainer');
-        const progressBar = document.getElementById('progressBar');
-        let currentDownloadLink = '';
-
-        // --- 2. LOAD DATA FROM JSON FILE ---
-        async function loadMovies() {
-            try {
-                const response = await fetch(DATA_URL);
-                if (!response.ok) throw new Error("Network response was not ok");
-                allMovies = await response.json();
-                renderMovies(allMovies);
-            } catch (error) {
-                console.error("Error loading movies:", error);
-                grid.innerHTML = `
-                    <div style="text-align:center; width:100%; grid-column:1/-1; color:red; padding: 2rem;">
-                        <h3 style="color: white;">Data Error</h3>
-                        <p>Could not load 'movies.json'. Make sure you uploaded it to GitHub.</p>
-                    </div>`;
+        // This is your corrected JSON data
+        const movieData = [
+            {
+                "title": "Download Tron: Ares (2025) IMAX BluRay [Hindi + Tamil + Telugu + English] ESub 480p 720p 1080p – Full Movie",
+                "image": "https://movies-fd.store/wp-content/uploads/2026/01/Download-Tron-Ares-2025-IMAX-BluRay-Hindi-Tamil-Telugu-English-ESub-480p-720p-1080p.jpg",
+                "link": "https://drive.usercontent.google.com/download?id=1xeQ9YLHGqC-qEG5BBFt6HG_aU39QjGKV&export=download&authuser=0&confirm=t&uuid=0f48abc8-5fb6-4859-b202-a05161f49290&at=ANTm3cxxnkFHCXNOKtGBI-KrOZ_5%3A1768966255126"
+            },
+            {
+                "title": "Download Stranger Things (2022) Season 4 WebRip [Hindi + Tamil + Telugu + English] S04 ESub 480p 720p – Complete",
+                "image": "https://movies-fd.store/wp-content/uploads/2024/04/Download-Stranger-Things-2022-Season-4-WebRip-Hindi-Tamil-Telugu-English-S04-ESub-480p-720p-Complete.jpg",
+                "link": "https://drive.usercontent.google.com/download?id=1EnqW6p2tXm4Wi6Lk0c9nFFczfmmrtLFa&export=download"
+            },
+            {
+                "title": "Download Stranger Things (2019) Season 3 WebRip [Hindi + Tamil + Telugu + English] S03 ESub 480p 720p – Complete",
+                "image": "https://movies-fd.store/wp-content/uploads/2024/04/Download-Stranger-Things-2019-Season-3-WebRip-Hindi-Tamil-Telugu-English-S03-ESub-480p-720p-Complete.jpg",
+                "link": "https://drive.usercontent.google.com/download?id=1u2EdsRryEV13lEEVQEBD33uV3S8utuJ2&export=download"
+            },
+            {
+                "title": "Download Stranger Things (2017) Season 2 WebRip [Hindi + Tamil + Telugu + English] S02 ESub 480p 720p – Complete",
+                "image": "https://movies-fd.store/wp-content/uploads/2024/04/Download-Stranger-Things-2017-Season-2-WebRip-Hindi-Tamil-Telugu-English-S02-ESub-480p-720p-Complete.jpg",
+                "link": "https://drive.usercontent.google.com/download?id=1eKikP6cZyHhnO5-w9JV1XwwD2nCnbbFF&export=download"
+            },
+            {
+                "title": "Download Stranger Things (2016) Season 1 WebRip [Hindi + Tamil + Telugu + English] S01 ESub 480p 720p – Complete",
+                "image": "https://movies-fd.store/wp-content/uploads/2024/04/Download-Stranger-Things-2016-Season-1-WebRip-Hindi-Tamil-Telugu-English-S01-ESub-480p-720p-Complete.jpg",
+                "link": "https://drive.usercontent.google.com/download?id=138G2-122Rl6Uz7tZf4uaELEiQK_jLiIx&export=download"
+            },
+            {
+                "title": "Download The Raja Saab (2026) HDCam [Hindi + Tamil + Telugu] 480p 720p 1080p – Full Movie",
+                "image": "https://movies-fd.store/wp-content/uploads/2026/01/Download-The-Raja-Saab-2025-HDCam-Hindi-Tamil-Telugu-480p-720p-1080p.jpg",
+                "link": "https://drive.usercontent.google.com/download?id=1_exyFTiELDSgc6W210uy_5B46rQcEEEv&export=download"
+            },
+            {
+                "title": "Download Akhanda 2: Thaandavam (2025) WebRip [Hindi + Tamil + Telugu + Malayalam + Kannada] ESub 480p 720p 1080p – Full Movie",
+                "image": "https://movies-fd.store/wp-content/uploads/2026/01/Download-Akhanda-2-Thaandavam-2025-WebRip-Hindi-Tamil-Telugu-Malayalam-Kannada-ESub-480p-720p-1080p.jpg",
+                "link": "https://drive.usercontent.google.com/download?id=1ymGF4SbETYRvwhEs21XuqTL6Ln7AsxVR&export=download"
+            },
+            {
+                "title": "Download Mask (2025) [WebRip Tamil] ESub 480p 720p",
+                "image": "https://movies-fd.store/wp-content/uploads/2026/01/Download-Mask-2025-WebRip-Tamil-ESub-480p-720p.jpg",
+                "link": "https://drive.usercontent.google.com/download?id=1xCEfJIFwlJ3DEFUdi_lshuiJ5tH22VIK&export=download"
+            },
+            {
+                "title": "Attack on Titan",
+                "image": "https://m.media-amazon.com/images/I/91bgH+66yTL._UF1000,1000_QL80_.jpg",
+                "link": "https://drive.google.com/drive/folders/13u_zQBuEjKJLOGSMtUQGp6532NniWXaL"
+            },
+            {
+                "title": "Stree (2018) HDRip - Tamil Dubbed",
+                "image": "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcSWAcD5w2UBY5BHLhaSguXLov9NYFuOIVXedA&s",
+                "link": "https://drive.google.com/file/d/1wOmFooX38Y53iT6vZn1H4yHqlcK5F04r/view"
+            },
+            {
+                "title": "Avatar The Last Airbender (2010)",
+                "image": "https://images.wallpapersden.com/image/download/avatar-the-last-airbender-netflix-poster_bmdnamuUmZqaraWkpJRmbmdlrWZlbWU.jpg",
+                "link": "https://drive.google.com/file/d/1C7Lni1VEzyW10Afmj890IdALzWnNpKof/view"
+            },
+            {
+                "title": "Solo Leveling S1–S2",
+                "image": "https://m.media-amazon.com/images/I/71SBzHXpYML.jpg",
+                "link": "https://in.tgstat.com/channel/@Solo_Leveling3Tamil"
             }
-        }
+        ];
 
-        // --- 3. SEARCH & RENDER ---
-        function renderMovies(movieList) {
-            grid.innerHTML = '';
-            if(movieList.length === 0) {
-                grid.innerHTML = '<div style="text-align:center; width:100%; grid-column:1/-1; color:#666;">No movies found.</div>';
-                return;
-            }
-
-            movieList.forEach(movie => {
+        // Function to create and render movie cards
+        function renderMovies(movies) {
+            const container = document.getElementById('movie-container');
+            
+            movies.forEach(movie => {
+                // Create the card container
                 const card = document.createElement('div');
                 card.className = 'movie-card';
-                card.onclick = () => openDownloadModal(movie.title, movie.link);
-                
-                // Fallback image in case the URL is broken
-                const imgSrc = movie.image ? movie.image : 'https://picsum.photos/300/400';
-                
-                card.innerHTML = `
-                    <div class="card-img-container">
-                        <img src="${imgSrc}" alt="${movie.title}" class="card-img" onerror="this.src='https://picsum.photos/300/400'">
-                    </div>
-                    <div class="card-info">
-                        <h3 class="card-title">${movie.title}</h3>
-                        <div class="card-sub">Click to Download</div>
-                    </div>
-                `;
-                grid.appendChild(card);
+
+                // Create the image element
+                const img = document.createElement('img');
+                img.src = movie.image;
+                img.alt = movie.title;
+
+                // Create the info container
+                const info = document.createElement('div');
+                info.className = 'movie-info';
+
+                // Create the title
+                const title = document.createElement('h3');
+                title.textContent = movie.title;
+
+                // Create the download button link
+                const link = document.createElement('a');
+                link.href = movie.link;
+                link.target = "_blank"; // Opens in a new tab
+                link.rel = "noopener noreferrer";
+                link.className = 'download-btn';
+                link.textContent = 'Download / Watch Now';
+
+                // Assemble the card
+                info.appendChild(title);
+                info.appendChild(link);
+                card.appendChild(img);
+                card.appendChild(info);
+
+                // Add the card to the page
+                container.appendChild(card);
             });
         }
 
-        function filterMovies() {
-            const query = document.getElementById('searchInput').value.toLowerCase();
-            const filtered = allMovies.filter(movie => 
-                movie.title.toLowerCase().includes(query)
-            );
-            renderMovies(filtered);
-        }
-
-        // --- 4. DOWNLOAD LOGIC ---
-        function openDownloadModal(title, link) {
-            currentDownloadLink = link;
-            modalTitle.innerText = `Download: ${title}?`;
-            modalButtons.style.display = 'flex';
-            progressContainer.style.display = 'none';
-            progressBar.style.width = '0%';
-            modal.classList.add('active');
-        }
-
-        function closeModal() {
-            modal.classList.remove('active');
-        }
-
-        function confirmDownload() {
-            modalButtons.style.display = 'none';
-            progressContainer.style.display = 'block';
-
-            let width = 0;
-            const interval = setInterval(() => {
-                if (width >= 100) {
-                    clearInterval(interval);
-                    startBrowserDownload();
-                    setTimeout(() => closeModal(), 500);
-                } else {
-                    width += 10; // Speed of animation
-                    progressBar.style.width = width + '%';
-                }
-            }, 100);
-        }
-
-        function startBrowserDownload() {
-            if (currentDownloadLink && currentDownloadLink !== '#') {
-                const a = document.createElement('a');
-                a.href = currentDownloadLink;
-                a.download = ''; // This attribute forces the browser to try downloading
-                document.body.appendChild(a);
-                a.click();
-                document.body.removeChild(a);
-            }
-        }
-
-        // --- 5. BACKGROUND ANIMATION (Starfield) ---
-        const canvas = document.getElementById('bg-canvas');
-        const ctx = canvas.getContext('2d');
-        let width, height;
-        let stars = [];
-
-        function resize() {
-            width = canvas.width = window.innerWidth;
-            height = canvas.height = window.innerHeight;
-        }
-
-        class Star {
-            constructor() { this.reset(); }
-            reset() {
-                this.x = Math.random() * width;
-                this.y = Math.random() * height;
-                this.z = Math.random() * 2 + 0.5;
-                this.size = Math.random() * 2;
-                this.opacity = Math.random();
-            }
-            update() {
-                this.x -= this.z;
-                if (this.x < 0) { this.x = width; this.y = Math.random() * height; }
-            }
-            draw() {
-                ctx.fillStyle = `rgba(0, 243, 255, ${this.opacity})`;
-                ctx.beginPath();
-                ctx.arc(this.x, this.y, this.size, 0, Math.PI * 2);
-                ctx.fill();
-            }
-        }
-
-        function initStars() {
-            stars = [];
-            for (let i = 0; i < 150; i++) stars.push(new Star());
-        }
-
-        function animate() {
-            ctx.clearRect(0, 0, width, height);
-            ctx.strokeStyle = 'rgba(188, 19, 254, 0.1)';
-            ctx.lineWidth = 0.5;
-            for(let i=0; i<stars.length; i++) {
-                stars[i].update();
-                stars[i].draw();
-                // Draw constellation lines
-                for(let j=i; j<stars.length; j++) {
-                    const dx = stars[i].x - stars[j].x;
-                    const dy = stars[i].y - stars[j].y;
-                    const dist = Math.sqrt(dx*dx + dy*dy);
-                    if(dist < 100) {
-                        ctx.beginPath();
-                        ctx.moveTo(stars[i].x, stars[i].y);
-                        ctx.lineTo(stars[j].x, stars[j].y);
-                        ctx.stroke();
-                    }
-                }
-            }
-            requestAnimationFrame(animate);
-        }
-
-        window.addEventListener('resize', resize);
-        resize();
-        initStars();
-        animate();
-
-        // Initialize App on Load
-        window.onload = loadMovies;
-
+        // Call the function to render the movies when the page loads
+        renderMovies(movieData);
     </script>
 </body>
 </html>
